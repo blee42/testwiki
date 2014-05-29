@@ -1,6 +1,6 @@
 from django.shortcuts import render
 # from .models import Page
-import grab_articles, alchemy_category, news_links
+import grab_articles, alchemy_category, news_links, wiki_category
 
 def extract_title(whole_title):
 	if "..." in whole_title:
@@ -26,7 +26,7 @@ def home(request):
 		array = x['external']
 
 		# get wiki categories
-		# x['cat'] = wiki_category.get_wiki_category(x['titles'],array)
+		x['cat'] = wiki_category.get_wiki_category(x['titles'],array)
 
 		# get alchemy categories
 		for y in array:
