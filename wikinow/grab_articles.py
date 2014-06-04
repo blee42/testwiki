@@ -1,8 +1,8 @@
-import urllib2, re, json
+import urllib2, re, json, copy
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
 
-def get_articles(current_url):
+def get_articles(current_url, imageOrNot):
 	#response = urllib2.urlopen('http://tools.wmflabs.org/wikitrends/english-uptrends-today.html')
 	response = urllib2.urlopen(current_url)
 	html = response.read()
@@ -31,33 +31,33 @@ def get_articles(current_url):
 			result['summary'] = summary_content[0]
 
 		#find image link
-		str_title = title[0]
-		str_title = unicode(str_title)
-		str_title = str_title.encode("ascii",'ignore')
-		link_title = urllib2.quote(str_title)
-		iquery = 'http://ajax.googleapis.com/ajax/services/search/images?v=1.0&imgsz=xxlarge&q=' + link_title
-		# iquery = 'http://ajax.googleapis.com/ajax/services/search/images?v=1.0&tbs=iar:s&q=' + link_title
-
-		try:
-			# img_response = urllib2.urlopen(iquery)
-			img_response = urllib2.Request(iquery, None, {'Referer': 'wikinow.herokuapp.com'})
-			response = urllib2.urlopen(img_response)
-			# json_data = json.loads(img_response.read())
-			json_data = json.loads(response.read())
-
-			response = json_data['responseData']
-			if (response is None):
-				result['img'] = 'google error'		
-			else:	
-				img_data = response['results'][0]
-				img_url = img_data[u'url']
-				result['img'] = img_url
+		if (imageOrNot == "true"):
+			str_title = title[0]
+			str_title = unicode(str_title)
+			str_title = str_title.encode("ascii",'ignore')
+			link_title = urllib2.quote(str_title)
+			iquery = 'http://ajax.googleapis.com/ajax/services/search/images?v=1.0&imgsz=xxlarge&q=' + link_title
+			# iquery = 'http://ajax.googleapis.com/ajax/services/search/images?v=1.0&biw=922bih=670&q=' + link_title
+			try:
+				img_response = urllib2.urlopen(iquery)
+				json_data = json.loads(img_response.read())
+				#print json_data['responseStatus']
+				response = json_data['responseData']
+				if (response is None):
+					result['img'] = 'http://www.mountainmansocialmedia.com/_site/wp-content/themes/juiced/img/thumbnail-default.jpg'
+					print 'error: Google Image API'	
+				else:	
+					for img_data in response['results']:
+						img_url = img_data[u'url']
+						img_url_check = copy.deepcopy(img_url)
+						if (img_url_check[-3:] == 'jpg') or (img_url_check[-3:] == 'png'):
+							result['img'] = img_url
+							break
+				
+			except urllib2.URLError, e:
+				handleError(e)
+				result['img'] = 'http://www.mountainmansocialmedia.com/_site/wp-content/themes/juiced/img/thumbnail-default.jpg'
 			
-		except urllib2.URLError, e:
-			# handleError(e)
-			result['img'] = 'No image available'
-		
-		
 		
 		#print 'rank: ' + str(count)
 		result['ranks'] = str(count)

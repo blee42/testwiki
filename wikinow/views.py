@@ -14,15 +14,15 @@ def home(request):
 	url = 'http://tools.wmflabs.org/wikitrends/english-uptrends-today.html'
 	url_most_visited = 'http://tools.wmflabs.org/wikitrends/english-most-visited-this-week.html'
 	url_downtrends = 'http://tools.wmflabs.org/wikitrends/english-downtrends-this-week.html'
-	result = grab_articles.get_articles(url)
+	result = grab_articles.get_articles(url, 'true')
 	
 	# does not grab news articles or categories for most_visited or downtrends
-	most_visited = grab_articles.get_articles(url_most_visited)
-	downtrends = grab_articles.get_articles(url_downtrends)
+	most_visited = grab_articles.get_articles(url_most_visited, 'false')
+	downtrends = grab_articles.get_articles(url_downtrends, 'false')
 	
 	for x in result:
 		titles_content = ''
-		x['external'] = (news_links.getLinks(x['titles']))
+		x['external'] = (news_links.getLinks(x['titles'], 'true'))
 		array = x['external']
 
 		# get wiki categories
